@@ -28,7 +28,7 @@ Este é um projeto Django para gerenciamento de funcionários, com CRUD completo
 1. Clone o repositório:
 
 ```bash
-git clone <URL_DO_REPOSITORIO>
+git clone https://github.com/VITOR-HUGO94/sistema_funcionarios_qrcode
 cd sistema_qrcode_v2
 Configure variáveis de ambiente criando um arquivo .env:
 
