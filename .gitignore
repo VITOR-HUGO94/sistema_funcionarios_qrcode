@@ -1,0 +1,43 @@
+# Python
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+*.swp
+*.swo
+*.egg-info/
+*.egg
+
+# Virtualenv
+venv/
+.env
+.env.*
+*.env
+
+# Django
+*.sqlite3
+db.sqlite3
+media/
+staticfiles/
+*.log
+
+# Migrations (já que o código-fonte deve estar no Git, mas migrations podem ou não)
+employees/migrations/__pycache__/
+qrcode_project/__pycache__/
+# Você pode versionar ou ignorar os arquivos de migration em si
+# employees/migrations/*.py
+
+# IDEs
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+*.dockerignore
+docker-compose.override.yml
+*.log
