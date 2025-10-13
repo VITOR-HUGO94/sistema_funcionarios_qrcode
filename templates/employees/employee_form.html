@@ -58,6 +58,14 @@
             {% endif %}
         </div>
         
+        <h3>Certificados</h3>
+            {{ formset.management_form }}
+            {% for cert_form in formset %}
+                <div class="certificate-form">
+                    {{ cert_form.as_p }}
+                </div>
+            {% endfor %}
+
         <button type="submit" class="btn btn-primary">Salvar</button>
         <a href="{% url 'employee_list' %}" class="btn btn-secondary">Cancelar</a>
     </form>

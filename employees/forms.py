@@ -1,6 +1,31 @@
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm
-from .models import Employee
+from .models import Employee,Certificate
+
+
+class CertificateForm(forms.ModelForm):
+    class Meta:
+        model = Certificate
+        fields = ['title', 'certificate_type', 'issue_date', 'issuing_organization', 'file', 'description']
+        widgets = {
+            'issue_date': forms.DateInput(attrs={'type': 'date'}),
+            'description': forms.Textarea(attrs={'rows': 3}),
+        }
+    
+    def clean_file(self):
+        file = self.cleaned_data.get('file')
+        if file:
+            # Valida o tamanho do arquivo (10MB máximo)
+            if file.size > 10 * 1024 * 1024:
+                raise forms.ValidationError("O arquivo não pode ser maior que 10MB.")
+            
+            # Valida as extensões permitidas
+            valid_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.pdf', '.webp']
+            ext = os.path.splitext(file.name)[1].lower()
+            if ext not in valid_extensions:
+                raise forms.ValidationError("Apenas imagens (JPG, PNG, GIF) e PDFs são permitidos.")
+        
+        return file
 
 class SiteLoginForm(AuthenticationForm):
     username = forms.CharField(

@@ -19,4 +19,7 @@ urlpatterns = [
     path('employees/<int:pk>/', views.employee_detail, name='employee_detail'),
     path('employees/<int:pk>/edit/', views.employee_update, name='employee_update'),
     path('employees/<int:pk>/delete/', views.employee_delete, name='employee_delete'),
+    # URLs para certificados
+    path('employees/<int:pk>/add-certificate/', views.add_certificate, name='add_certificate'),
+    path('certificates/<int:pk>/delete/', views.delete_certificate, name='delete_certificate'),
 ]

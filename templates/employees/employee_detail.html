@@ -2,23 +2,131 @@
 
 {% block content %}
 <div class="container mt-4">
-    <h1>Detalhes do Funcionário</h1>
-    
-    <div class="card">
-        <div class="card-body">
-            <h5 class="card-title">{{ employee.first_name }} {{ employee.last_name }}</h5>
-            <p class="card-text"><strong>E-mail:</strong> {{ employee.email }}</p>
-            <p class="card-text"><strong>Departamento:</strong> {{ employee.department }}</p>
-            <p class="card-text"><strong>Data de Contratação:</strong> {{ employee.hire_date }}</p>
-            <h4>QR Code do Funcionário</h4>
-            <img src="{{ employee.generate_qr_code }}" alt="QR Code">
+    <!-- Cabeçalho do Funcionário -->
+    <div class="row">
+        <div class="col-md-8">
+            <h1>{{ employee.first_name }} {{ employee.last_name }}</h1>
+            <p class="lead">{{ employee.department }}</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{% url 'employee_update' employee.pk %}" class="btn btn-warning">Editar</a>
+            <a href="{% url 'employee_list' %}" class="btn btn-secondary">Voltar</a>
         </div>
     </div>
-    
-    <div class="mt-3">
-        <a href="{% url 'employee_list' %}" class="btn btn-secondary">Voltar</a>
-        <a href="{% url 'employee_update' employee.pk %}" class="btn btn-primary">Editar</a>
-        <a href="{% url 'employee_delete' employee.pk %}" class="btn btn-danger">Deletar</a>
+
+    <!-- Informações Básicas -->
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5>Informações do Funcionário</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>E-mail:</strong> {{ employee.email }}</p>
+                    <p><strong>Departamento:</strong> {{ employee.department }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Data de Contratação:</strong> {{ employee.hire_date }}</p>
+                    <p><strong>ID:</strong> {{ employee.pk }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- QR Code -->
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5>QR Code Público</h5>
+        </div>
+        <div class="card-body text-center">
+            <img src="{{ employee.generate_qr_code }}" alt="QR Code" class="img-fluid" style="max-width: 200px;">
+            <p class="text-muted mt-2">Escaneie para acessar informações públicas</p>
+        </div>
+    </div>
+
+    <!-- Seção de Certificados -->
+    <div class="card mt-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5>Certificados e Documentos</h5>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCertificateModal">
+                Adicionar Certificado
+            </button>
+        </div>
+        <div class="card-body">
+            {% if certificates %}
+            <div class="row">
+                {% for certificate in certificates %}
+                <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="card-title">{{ certificate.title }}</h6>
+                            <p class="card-text">
+                                <small class="text-muted">
+                                    {{ certificate.issuing_organization }}<br>
+                                    Emitido em: {{ certificate.issue_date }}<br>
+                                    Tipo: {{ certificate.get_certificate_type_display }}
+                                </small>
+                            </p>
+                            
+                            {% if certificate.is_image %}
+                                <img src="{{ certificate.file.url }}" alt="{{ certificate.title }}" 
+                                     class="img-fluid mb-2" style="max-height: 150px; object-fit: cover;">
+                            {% elif certificate.is_pdf %}
+                                <div class="text-center mb-2">
+                                    <i class="fas fa-file-pdf fa-3x text-danger"></i>
+                                    <p class="small">Documento PDF</p>
+                                </div>
+                            {% endif %}
+                            
+                            {% if certificate.description %}
+                                <p class="card-text small">{{ certificate.description|truncatewords:20 }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="card-footer">
+                            <a href="{{ certificate.file.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-download"></i> Baixar
+                            </a>
+                            <form method="post" action="{% url 'delete_certificate' certificate.pk %}" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-danger" 
+                                        onclick="return confirm('Tem certeza que deseja excluir este certificado?')">
+                                    <i class="fas fa-trash"></i> Excluir
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-muted text-center">Nenhum certificado cadastrado.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Adicionar Certificado -->
+<div class="modal fade" id="addCertificateModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Adicionar Certificado</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" action="{% url 'add_certificate' employee.pk %}" enctype="multipart/form-data">
+                <div class="modal-body">
+                    {% csrf_token %}
+                    {{ certificate_form.as_p }}
+                    <small class="text-muted">
+                        Formatos aceitos: JPG, PNG, GIF, PDF (máx. 10MB)
+                    </small>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar Certificado</button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 {% endblock %}
