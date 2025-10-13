@@ -32,6 +32,7 @@ class Employee(models.Model):
         qr = qrcode.QRCode(version=1, box_size=10, border=5)
         public_url = self.get_public_url()
         qr.add_data(f"https://sistema-funcionarios-qrcode.onrender.com{public_url}")
+  
         qr.make(fit=True)
 
         img = qr.make_image(fill_color="black", back_color="white")

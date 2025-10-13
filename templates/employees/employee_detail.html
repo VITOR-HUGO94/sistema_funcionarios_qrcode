@@ -1,66 +1,24 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Informações do Funcionário</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        .employee-card {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        .employee-name {
-            color: #333;
-            border-bottom: 2px solid #007bff;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-        }
-        .info-row {
-            margin: 15px 0;
-            padding: 10px;
-            background: #f8f9fa;
-            border-radius: 5px;
-        }
-        .label {
-            font-weight: bold;
-            color: #555;
-        }
-        .back-link {
-            display: inline-block;
-            margin-top: 20px;
-            color: #007bff;
-            text-decoration: none;
-        }
-    </style>
-</head>
-<body>
-    <div class="employee-card">
-        <h1 class="employee-name">{{ employee.first_name }} {{ employee.last_name }}</h1>
-        
-        <div class="info-row">
-            <span class="label">E-mail:</span>
-            {{ employee.email }}
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Detalhes do Funcionário</h1>
+    
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">{{ employee.first_name }} {{ employee.last_name }}</h5>
+            <p class="card-text"><strong>E-mail:</strong> {{ employee.email }}</p>
+            <p class="card-text"><strong>Departamento:</strong> {{ employee.department }}</p>
+            <p class="card-text"><strong>Data de Contratação:</strong> {{ employee.hire_date }}</p>
+            <h4>QR Code do Funcionário</h4>
+            <img src="{{ employee.generate_qr_code }}" alt="QR Code">
         </div>
-        
-        <div class="info-row">
-            <span class="label">Departamento:</span>
-            {{ employee.department }}
-        </div>
-        
-        <div class="info-row">
-            <span class="label">Data de Contratação:</span>
-            {{ employee.hire_date }}
-        </div>
-        
-        <a href="javascript:history.back()" class="back-link">← Voltar</a>
     </div>
-</body>
-</html>
+    
+    <div class="mt-3">
+        <a href="{% url 'employee_list' %}" class="btn btn-secondary">Voltar</a>
+        <a href="{% url 'employee_update' employee.pk %}" class="btn btn-primary">Editar</a>
+        <a href="{% url 'employee_delete' employee.pk %}" class="btn btn-danger">Deletar</a>
+    </div>
+</div>
+{% endblock %}
