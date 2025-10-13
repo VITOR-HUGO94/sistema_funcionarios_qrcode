@@ -7,6 +7,9 @@ urlpatterns = [
     # Página inicial (login)
     path('', views.home_view, name='home'),
     
+    # URLs públicas (acesso via QR code)
+    path('public/employee/<int:pk>/', views.public_employee_detail, name='public_employee_detail'),
+
     # Logout
     path('login/', views.site_login, name='site_login'),
     path('logout/', views.site_logout, name='site_logout'),

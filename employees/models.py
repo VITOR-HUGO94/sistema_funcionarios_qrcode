@@ -18,14 +18,20 @@ class Employee(models.Model):
     
     def get_absolute_url(self):
         return reverse('employee_detail', args=[self.pk])
-    
+    def get_public_url(self):
+        """
+        URL pública para acesso via QR code (sem autenticação)
+        """
+        return reverse('public_employee_detail', args=[self.pk])
+
+
     def generate_qr_code(self):
         """
         Retorna o QR Code em base64 para exibir diretamente na página
         """
         qr = qrcode.QRCode(version=1, box_size=10, border=5)
-        url = self.get_absolute_url()  # URL relativa
-        qr.add_data(f"https://sistema-funcionarios-qrcode.onrender.com{url}")  # pode mudar domínio em produção
+        public_url = self.get_public_url()
+        qr.add_data(f"https://sistema-funcionarios-qrcode.onrender.com{public_url}")
         qr.make(fit=True)
 
         img = qr.make_image(fill_color="black", back_color="white")

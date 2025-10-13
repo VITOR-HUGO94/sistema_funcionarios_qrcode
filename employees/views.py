@@ -40,6 +40,16 @@ def home_view(request):
     """Página inicial que redireciona para o login apropriado"""
     return render(request, 'home.html')
 
+# ✅ NOVA VIEW PÚBLICA PARA QR CODE
+def public_employee_detail(request, pk):
+    """
+    View pública para acesso via QR code - não requer autenticação
+    """
+    employee = get_object_or_404(Employee, pk=pk)
+    return render(request, 'employees/public_employee_detail.html', {
+        'employee': employee
+    })
+
 @login_required
 def employee_list(request):
     employees = Employee.objects.all()
