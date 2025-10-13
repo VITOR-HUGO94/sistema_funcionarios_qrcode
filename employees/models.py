@@ -25,7 +25,7 @@ class Employee(models.Model):
         """
         qr = qrcode.QRCode(version=1, box_size=10, border=5)
         url = self.get_absolute_url()  # URL relativa
-        qr.add_data(f"http://localhost:8000{url}")  # pode mudar domínio em produção
+        qr.add_data(f"https://sistema-funcionarios-qrcode.onrender.com{url}")  # pode mudar domínio em produção
         qr.make(fit=True)
 
         img = qr.make_image(fill_color="black", back_color="white")
