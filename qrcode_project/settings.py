@@ -107,9 +107,8 @@ USE_TZ = True
 
 # Static files
 STATIC_URL = '/static/'
-# folder used at collectstatic time (for production)
 STATIC_ROOT = BASE_DIR / "staticfiles"
-# your local static folder (optional). If it doesn't exist, you can remove/comment this.
+
 STATICFILES_DIRS = [BASE_DIR / "static"]
 
 # Use WhiteNoise to serve files and enable compression (optional config)
