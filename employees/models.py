@@ -5,7 +5,7 @@ import qrcode
 from io import BytesIO
 import base64
 from django.core.files.base import ContentFile
-
+import os
 class Employee(models.Model):
     first_name = models.CharField(max_length=100, verbose_name='Nome')
     last_name = models.CharField(max_length=100, verbose_name='Sobrenome')
