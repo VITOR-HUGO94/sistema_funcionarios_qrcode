@@ -3,11 +3,10 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import Certificate, Employee, SiteUser
-from .forms import EmployeeForm, SiteLoginForm
+from .forms import EmployeeForm, SiteLoginForm, CertificateForm  # Adicione CertificateForm aqui
 from django.forms import modelformset_factory
 
-CertificateFormSet = modelformset_factory(Certificate, form=CertificateForm, extra=1, can_delete=True)
-
+# Remova a linha do CertificateFormSet daqui
 
 def site_login(request):
     """Login específico para o sistema do site"""
@@ -50,8 +49,10 @@ def public_employee_detail(request, pk):
     View pública para acesso via QR code - não requer autenticação
     """
     employee = get_object_or_404(Employee, pk=pk)
+    certificates = employee.certificates.all()
     return render(request, 'employees/public_employee_detail.html', {
-        'employee': employee
+        'employee': employee,
+        'certificates': certificates
     })
 
 @login_required
@@ -101,6 +102,7 @@ def employee_update(request, pk):
         form = EmployeeForm(instance=employee)
         formset = CertificateFormSet(queryset=Certificate.objects.filter(employee=employee))
     return render(request, 'employees/employee_form.html', {'form': form, 'formset': formset})
+
 @login_required
 def employee_delete(request, pk):
     employee = get_object_or_404(Employee, pk=pk)
@@ -109,6 +111,7 @@ def employee_delete(request, pk):
         messages.success(request, 'Funcionário excluído com sucesso!')
         return redirect('employee_list')
     return render(request, 'employees/employee_delete.html', {'employee': employee})
+
 @login_required
 def employee_detail(request, pk):
     employee = get_object_or_404(Employee, pk=pk)
@@ -149,15 +152,3 @@ def delete_certificate(request, pk):
         messages.success(request, 'Certificado removido com sucesso!')
     
     return redirect('employee_detail', pk=employee_pk)
-
-# View pública atualizada para mostrar certificados
-def public_employee_detail(request, pk):
-    """
-    View pública para acesso via QR code - não requer autenticação
-    """
-    employee = get_object_or_404(Employee, pk=pk)
-    certificates = employee.certificates.all()
-    return render(request, 'employees/public_employee_detail.html', {
-        'employee': employee,
-        'certificates': certificates
-    })
