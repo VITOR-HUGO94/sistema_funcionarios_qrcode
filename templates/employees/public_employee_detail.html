@@ -1,43 +1,54 @@
-<!-- Seção de Certificados (Pública) -->
 <div class="info-section">
-    <h2 class="section-title">Certificados e Qualificações</h2>
+    <h2 class="section-title">Certificados</h2>
     <div class="certificates-grid">
         {% for certificate in certificates %}
-        <div class="certificate-item">
-            <div class="certificate-header">
-                <h4>{{ certificate.title }}</h4>
-                <span class="badge badge-type">{{ certificate.get_certificate_type_display }}</span>
+            {% if certificate.is_image %}
+            <div class="certificate-item">
+                <div class="certificate-preview">
+                    <img src="{{ certificate.file.url }}" 
+                         alt="Certificado do funcionário" 
+                         style="max-width: 100%; max-height: 300px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                </div>
             </div>
-            <div class="certificate-info">
-                <p><strong>Organização:</strong> {{ certificate.issuing_organization }}</p>
-                <p><strong>Data de Emissão:</strong> {{ certificate.issue_date|date:"d/m/Y" }}</p>
-                
-                {% if certificate.is_image %}
-                    <div class="certificate-preview">
-                        <img src="{{ certificate.file.url }}" alt="{{ certificate.title }}" 
-                             onclick="openModal('{{ certificate.file.url }}')">
-                    </div>
-                {% elif certificate.is_pdf %}
-                    <div class="certificate-preview pdf">
-                        <i class="fas fa-file-pdf"></i>
-                        <p>Documento PDF</p>
-                        <a href="{{ certificate.file.url }}" target="_blank" class="btn-download">
-                            Visualizar PDF
-                        </a>
-                    </div>
-                {% endif %}
-                
-                {% if certificate.description %}
-                    <div class="certificate-description">
-                        <p>{{ certificate.description }}</p>
-                    </div>
-                {% endif %}
-            </div>
-        </div>
+            {% endif %}
         {% empty %}
         <div class="no-certificates">
-            <p>Nenhum certificado cadastrado.</p>
+            <p style="text-align: center; color: #6c757d; font-style: italic;">
+                Nenhum certificado disponível.
+            </p>
         </div>
         {% endfor %}
     </div>
 </div>
+
+<style>
+.certificates-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.certificate-item {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 15px;
+    text-align: center;
+    border: 1px solid #e9ecef;
+}
+
+.certificate-preview img {
+    transition: transform 0.3s ease;
+}
+
+.certificate-preview img:hover {
+    transform: scale(1.05);
+}
+
+@media (max-width: 768px) {
+    .certificates-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 15px;
+    }
+}
+</style>

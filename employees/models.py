@@ -68,25 +68,12 @@ def certificate_upload_path(instance, filename):
     return f'certificates/employee_{instance.employee.id}/{filename}'
 
 class Certificate(models.Model):
-    CERTIFICATE_TYPES = [
-        ('diploma', 'Diploma'),
-        ('course', 'Curso'),
-        ('training', 'Treinamento'),
-        ('certification', 'Certificação'),
-        ('other', 'Outro'),
-    ]
-    
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='certificates')
-    title = models.CharField(max_length=200, verbose_name='Título do Certificado')
-    certificate_type = models.CharField(max_length=20, choices=CERTIFICATE_TYPES, default='other', verbose_name='Tipo')
-    issue_date = models.DateField(verbose_name='Data de Emissão')
-    issuing_organization = models.CharField(max_length=200, verbose_name='Organização Emissora')
     file = models.FileField(upload_to=certificate_upload_path, verbose_name='Arquivo')
     uploaded_at = models.DateTimeField(auto_now_add=True)
-    description = models.TextField(blank=True, verbose_name='Descrição')
     
     def __str__(self):
-        return f"{self.title} - {self.employee}"
+        return f"Certificado {self.id} - {self.employee}"
     
     def file_extension(self):
         """Retorna a extensão do arquivo"""
@@ -103,6 +90,6 @@ class Certificate(models.Model):
         return self.file_extension() == '.pdf'
     
     class Meta:
-        ordering = ['-issue_date']
+        ordering = ['-uploaded_at']
         verbose_name = 'Certificado'
         verbose_name_plural = 'Certificados'

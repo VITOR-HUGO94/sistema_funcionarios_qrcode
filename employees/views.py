@@ -43,13 +43,19 @@ def home_view(request):
     """Página inicial que redireciona para o login apropriado"""
     return render(request, 'home.html')
 
-# ✅ NOVA VIEW PÚBLICA PARA QR CODE
 def public_employee_detail(request, pk):
     """
     View pública para acesso via QR code - não requer autenticação
+    MOSTRA APENAS CERTIFICADOS QUE SÃO IMAGENS
     """
     employee = get_object_or_404(Employee, pk=pk)
-    certificates = employee.certificates.all()
+    
+    # Filtra apenas certificados que são imagens
+    certificates = [
+        cert for cert in employee.certificates.all() 
+        if cert.is_image()
+    ]
+    
     return render(request, 'employees/public_employee_detail.html', {
         'employee': employee,
         'certificates': certificates

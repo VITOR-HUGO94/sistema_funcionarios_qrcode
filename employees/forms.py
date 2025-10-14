@@ -6,11 +6,7 @@ import os
 class CertificateForm(forms.ModelForm):
     class Meta:
         model = Certificate
-        fields = ['title', 'certificate_type', 'issue_date', 'issuing_organization', 'file', 'description']
-        widgets = {
-            'issue_date': forms.DateInput(attrs={'type': 'date'}),
-            'description': forms.Textarea(attrs={'rows': 3}),
-        }
+        fields = ['file']  # Apenas o campo file
     
     def clean_file(self):
         file = self.cleaned_data.get('file')
@@ -23,7 +19,7 @@ class CertificateForm(forms.ModelForm):
             valid_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.pdf', '.webp']
             ext = os.path.splitext(file.name)[1].lower()
             if ext not in valid_extensions:
-                raise forms.ValidationError("Apenas imagens (JPG, PNG, GIF) e PDFs são permitidos.")
+                raise forms.ValidationError("Apenas imagens (JPG, PNG, GIF, WEBP) e PDFs são permitidos.")
         
         return file
 
