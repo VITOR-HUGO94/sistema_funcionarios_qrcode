@@ -111,6 +111,11 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 
 STATICFILES_DIRS = [BASE_DIR / "static"]
 
+
+MEDIA_ROOT = BASE_DIR / 'media'
+# Public URL for browser access
+MEDIA_URL = '/media/'
+
 # Use WhiteNoise to serve files and enable compression (optional config)
 # from whitenoise import WhiteNoise  <-- no import required here, middleware handles it
 
