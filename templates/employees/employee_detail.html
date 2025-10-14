@@ -7,7 +7,7 @@
         </button>
     </div>
     <div class="card-body">
-        {% if employee.certificates.all %}
+        {% if employee.certificates.exists %}
         <div class="row">
             {% for certificate in employee.certificates.all %}
             <div class="col-md-6 col-lg-4 mb-3">
