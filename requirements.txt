@@ -5,3 +5,8 @@ Pillow
 qrcode
 whitenoise
 gunicorn
+pypdf
+pdfplumber
+python-dateutil
+python-magic    
+pytesseract     

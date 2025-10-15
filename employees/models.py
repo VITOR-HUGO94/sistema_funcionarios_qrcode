@@ -68,28 +68,34 @@ def certificate_upload_path(instance, filename):
     return f'certificates/employee_{instance.employee.id}/{filename}'
 
 class Certificate(models.Model):
-    employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='certificates')
+    employee = models.ForeignKey('Employee', on_delete=models.CASCADE, related_name='certificates')
     file = models.FileField(upload_to=certificate_upload_path, verbose_name='Arquivo')
     uploaded_at = models.DateTimeField(auto_now_add=True)
-    
-    def __str__(self):
-        return f"Certificado {self.id} - {self.employee}"
-    
-    def file_extension(self):
-        """Retorna a extensão do arquivo"""
-        name, extension = os.path.splitext(self.file.name)
-        return extension.lower()
-    
-    def is_image(self):
-        """Verifica se o arquivo é uma imagem"""
-        image_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp']
-        return self.file_extension() in image_extensions
-    
-    def is_pdf(self):
-        """Verifica se o arquivo é PDF"""
-        return self.file_extension() == '.pdf'
-    
+    extracted_date = models.DateField(null=True, blank=True)   # opcional, para extrair data do PDF
+    raw_text = models.TextField(blank=True)
+
     class Meta:
         ordering = ['-uploaded_at']
         verbose_name = 'Certificado'
         verbose_name_plural = 'Certificados'
+
+    def __str__(self):
+        return f"Certificado {self.id} - {self.employee}"
+
+    @property
+    def filename(self):
+        return os.path.basename(self.file.name)
+
+    @property
+    def file_extension(self):
+        name, extension = os.path.splitext(self.file.name or '')
+        return extension.lower()
+
+    @property
+    def is_image(self):
+        image_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp']
+        return self.file_extension in image_extensions
+
+    @property
+    def is_pdf(self):
+        return self.file_extension == '.pdf'

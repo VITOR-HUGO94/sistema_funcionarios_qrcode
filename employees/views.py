@@ -2,6 +2,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+
+from employees.utils import extract_date_from_pdf
 from .models import Certificate, Employee, SiteUser
 from .forms import EmployeeForm, SiteLoginForm, CertificateForm  # Adicione CertificateForm aqui
 from django.forms import modelformset_factory
@@ -140,6 +142,16 @@ def add_certificate(request, pk):
             certificate = form.save(commit=False)
             certificate.employee = employee
             certificate.save()
+
+            # 🔍 Se for um PDF, tenta extrair a data de emissão
+            if certificate.file.name.lower().endswith('.pdf'):
+                file_path = certificate.file.path
+                data_emissao = extract_date_from_pdf(file_path)
+                if data_emissao:
+                    certificate.data_emissao = data_emissao
+                    certificate.save()
+                    messages.info(request, f'Data de emissão detectada: {data_emissao}')
+
             messages.success(request, 'Certificado adicionado com sucesso!')
         else:
             for error in form.errors.values():

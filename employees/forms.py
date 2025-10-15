@@ -6,22 +6,16 @@ import os
 class CertificateForm(forms.ModelForm):
     class Meta:
         model = Certificate
-        fields = ['file']  # Apenas o campo file
-    
+        fields = ['file']
+        widgets = {
+            'file': forms.ClearableFileInput(attrs={'accept': '.pdf,image/*'})
+        }
+
     def clean_file(self):
-        file = self.cleaned_data.get('file')
-        if file:
-            # Valida o tamanho do arquivo (10MB máximo)
-            if file.size > 10 * 1024 * 1024:
-                raise forms.ValidationError("O arquivo não pode ser maior que 10MB.")
-            
-            # Valida as extensões permitidas
-            valid_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.pdf', '.webp']
-            ext = os.path.splitext(file.name)[1].lower()
-            if ext not in valid_extensions:
-                raise forms.ValidationError("Apenas imagens (JPG, PNG, GIF, WEBP) e PDFs são permitidos.")
-        
-        return file
+        f = self.cleaned_data.get('file')
+        if f and f.size > 10 * 1024 * 1024:  # 10 MB
+            raise forms.ValidationError('Arquivo muito grande (máx. 10MB).')
+        return f
 
 class SiteLoginForm(AuthenticationForm):
     username = forms.CharField(
