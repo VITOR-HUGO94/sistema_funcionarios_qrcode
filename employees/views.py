@@ -55,7 +55,7 @@ def public_employee_detail(request, pk):
     # Filtra apenas certificados que são imagens
     certificates = [
         cert for cert in employee.certificates.all() 
-        if cert.is_image()
+        if cert.is_image
     ]
     
     return render(request, 'employees/public_employee_detail.html', {
