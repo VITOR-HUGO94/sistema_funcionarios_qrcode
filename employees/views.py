@@ -52,11 +52,9 @@ def public_employee_detail(request, pk):
     """
     employee = get_object_or_404(Employee, pk=pk)
     
-    # Filtra apenas certificados que são imagens
-    certificates = [
-        cert for cert in employee.certificates.all() 
-        if cert.is_image
-    ]
+    # Envia todos os certificados (imagens + pdfs). Se quiser só imagens:
+    # certificates = [ cert for cert in employee.certificates.all() if cert.is_image ]
+    certificates = employee.certificates.all()
     
     return render(request, 'employees/public_employee_detail.html', {
         'employee': employee,

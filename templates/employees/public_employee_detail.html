@@ -526,33 +526,38 @@
 
     <script>
         // Funções para o modal de imagem
-        function openModal(imageUrl) {
-            document.getElementById('modalImage').src = imageUrl;
-            document.getElementById('imageModal').style.display = 'block';
-        }
+          function openModal(fileUrl, type) {
+    if (type === 'image') {
+      document.getElementById('modalImage').src = fileUrl;
+      document.getElementById('imageModal').style.display = 'block';
+      // garantir que iframe/pdf não exibido no modal
+      let iframe = document.getElementById('modalPdf');
+      if (iframe) iframe.style.display = 'none';
+    } else if (type === 'pdf') {
+      // se quiser exibir pdf no modal (opcional) — cuidado com X-Frame-Options
+      // a opção mais robusta é abrir em nova aba:
+      window.open(fileUrl, '_blank');
+    }
+  }
 
-        function closeModal() {
-            document.getElementById('imageModal').style.display = 'none';
-        }
+  function closeModal() {
+      document.getElementById('imageModal').style.display = 'none';
+      // se tiver iframe para pdf, limpar src
+      let iframe = document.getElementById('modalPdf');
+      if (iframe) iframe.src = '';
+  }
 
-        // Fechar modal ao clicar fora da imagem
-        document.getElementById('imageModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeModal();
-            }
-        });
+  document.getElementById('imageModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+          closeModal();
+      }
+  });
 
-        // Fechar modal com a tecla ESC
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                closeModal();
-            }
-        });
-
-        // Adicionar classe loaded para possíveis animações futuras
-        document.addEventListener('DOMContentLoaded', function() {
-            document.body.classList.add('loaded');
-        });
+  document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+          closeModal();
+      }
+  });
     </script>
 </body>
 </html>
