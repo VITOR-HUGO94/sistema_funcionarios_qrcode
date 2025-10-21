@@ -147,17 +147,24 @@ MESSAGE_TAGS = {
 }
 
 # Configurações do Cloudinary
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
+
+cloudinary.config(
+    cloud_name=os.getenv('CLOUD_NAME'),
+    api_key=os.getenv('API_KEY'),
+    api_secret=os.getenv('API_SECRET'),
+    secure=True
+)
+
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': os.getenv('CLOUD_NAME'),
     'API_KEY': os.getenv('API_KEY'),
     'API_SECRET': os.getenv('API_SECRET'),
-    'UPLOAD_OPTIONS': {
-        'resource_type': 'auto',
-        'access_mode': 'public',
-    },
+    'SECURE': True,
+    'STATICFILES_MANIFEST_ROOT': BASE_DIR / 'static',
 }
-
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 
 # Secure cookies in production (recommended)
