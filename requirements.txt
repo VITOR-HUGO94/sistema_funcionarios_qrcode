@@ -9,4 +9,5 @@ pypdf
 pdfplumber
 python-dateutil
 python-magic    
-pytesseract     
+pytesseract
+django-cloudinary-storage

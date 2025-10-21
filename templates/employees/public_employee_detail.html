@@ -495,6 +495,7 @@
             <div style="padding:20px; text-align:center;">
               <i class="fas fa-file fa-3x" style="color:#6c757d;"></i>
               <p class="small text-muted mt-2">{{ certificate.filename }}</p>
+              <iframe src="{{ certificate.file.url }}" width="100%" height="500px"></iframe>
               <a href="{{ certificate.file.url }}" target="_blank" class="view-btn">Baixar</a>
             </div>
           {% endif %}
