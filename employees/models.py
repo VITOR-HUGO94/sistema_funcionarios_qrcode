@@ -69,7 +69,7 @@ def certificate_upload_path(instance, filename):
 
 class Certificate(models.Model):
     employee = models.ForeignKey('Employee', on_delete=models.CASCADE, related_name='certificates')
-    file = models.FileField(upload_to=certificate_upload_path, verbose_name='Arquivo')
+    file = models.FileField(upload_to=certificate_upload_path, verbose_name='Arquivo', max_length=255)
     uploaded_at = models.DateTimeField(auto_now_add=True)
     extracted_date = models.DateField(null=True, blank=True)   # opcional, para extrair data do PDF
     raw_text = models.TextField(blank=True)
