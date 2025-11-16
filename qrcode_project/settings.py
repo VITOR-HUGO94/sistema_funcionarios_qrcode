@@ -77,13 +77,23 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'qrcode_project.wsgi.application'
 
-# Database (unchanged, still using dj_database_url)
+DATABASE_URL = os.environ.get("DATABASE_URL")
+
+if not DATABASE_URL:
+    # só para dev local — não recomendado em produção
+    DATABASE_URL = "postgresql://user:pass@db:5432/qrcodedb"
+
 DATABASES = {
-    "default": dj_database_url.config(
-        default=os.environ.get("DATABASE_URL", "postgres://user:pass@db:5432/qrcodedb"),
+    'default': dj_database_url.parse(
+        os.environ.get("DATABASE_URL"),
         conn_max_age=600,
+        ssl_require=True
     )
 }
+
+# Opcional: timeouts/opts para evitar falhas de handshake
+DATABASES["default"].setdefault("OPTIONS", {})
+DATABASES["default"]["OPTIONS"].setdefault("connect_timeout", 20)
 
 # Password validation (unchanged)
 AUTH_PASSWORD_VALIDATORS = [
