@@ -2,6 +2,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+import logging
 
 from employees.utils import extract_date_from_pdf
 from .models import Certificate, Employee, SiteUser
@@ -128,48 +130,59 @@ def employee_detail(request, pk):
         'certificates': certificates,
         'certificate_form': certificate_form
     })
+logger = logging.getLogger(__name__)
 
 @login_required
 def add_certificate(request, pk):
-    """Adiciona um certificado ao funcionário"""
     employee = get_object_or_404(Employee, pk=pk)
-    
-    if request.method == 'POST':
-        form = CertificateForm(request.POST, request.FILES)
-        if form.is_valid():
-            certificate = form.save(commit=False)
-            certificate.employee = employee
-            certificate.save()
+    if request.method != 'POST':
+        messages.error(request, 'Método inválido.')
+        return redirect('employee_detail', pk=employee.pk)
 
-            # 🔍 Se for um PDF, tenta extrair a data de emissão usando file-like (compatível com storage remoto)
-            if certificate.file.name.lower().endswith('.pdf'):
+    form = CertificateForm(request.POST, request.FILES)
+    # DEBUG: log do que chegou
+    logger.debug("add_certificate: request.FILES keys = %s", list(request.FILES.keys()))
+    logger.debug("add_certificate: request.POST keys = %s", list(request.POST.keys()))
+
+    if not request.FILES:
+        messages.error(request, 'Nenhum arquivo enviado (request.FILES está vazio). Verifique o enctype no formulário.')
+        return redirect('employee_detail', pk=employee.pk)
+
+    if form.is_valid():
+        certificate = form.save(commit=False)
+        certificate.employee = employee
+        certificate.save()
+        logger.info("Certificado salvo (id=%s) file=%s", certificate.pk, certificate.file.name)
+
+        # tenta extrair data se for pdf (opcional)
+        if certificate.file.name.lower().endswith('.pdf'):
+            try:
+                certificate.file.open('rb')
+                data = extract_date_from_pdf(certificate.file)
+                if data:
+                    certificate.extracted_date = data
+                    certificate.save()
+                    messages.info(request, f'Data de emissão detectada: {data}')
+                else:
+                    logger.info("Nenhuma data detectada no PDF (id=%s).", certificate.pk)
+            except Exception as e:
+                logger.exception("Erro ao extrair data do PDF: %s", e)
+                messages.warning(request, 'Erro ao tentar extrair data do PDF (veja logs).')
+            finally:
                 try:
-                    # abra o arquivo via storage (file-like). pypdf aceita file-like objects.
-                    certificate.file.open('rb')
-                    data_emissao = extract_date_from_pdf(certificate.file)
-                    if data_emissao:
-                        # Salva no campo existente extracted_date
-                        certificate.extracted_date = data_emissao
-                        certificate.save()
-                        messages.info(request, f'Data de emissão detectada: {data_emissao}')
-                except Exception as e:
-                    # não quebrar o fluxo; apenas avisar e logar
-                    messages.warning(request, f'Não foi possível extrair data do PDF: {e}')
-                    print("Erro extração PDF:", e)
-                finally:
-                    try:
-                        certificate.file.close()
-                    except:
-                        pass
+                    certificate.file.close()
+                except:
+                    pass
 
-            messages.success(request, 'Certificado adicionado com sucesso!')
-        else:
-            # mostra erros do form (limpos)
-            for field, errs in form.errors.items():
-                for err in errs:
-                    messages.error(request, f'{field}: {err}')
-    return redirect('employee_detail', pk=employee.pk)
+        messages.success(request, 'Certificado adicionado com sucesso!')
+        return redirect('employee_detail', pk=employee.pk)
 
+    else:
+        # log completo para debugging
+        logger.warning("Form inválido: %s", form.errors.as_json())
+        messages.error(request, 'Formulário inválido. Erros: %s' % form.errors.as_text())
+        return redirect('employee_detail', pk=employee.pk)
+    
 @login_required
 def delete_certificate(request, pk):
     """Remove um certificado"""

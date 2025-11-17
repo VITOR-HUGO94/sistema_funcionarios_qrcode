@@ -6,7 +6,7 @@ import os
 class CertificateForm(forms.ModelForm):
     class Meta:
         model = Certificate
-        fields = ['file']
+        fields = ['file', 'description']
         widgets = {
             'file': forms.ClearableFileInput(attrs={'accept': '.pdf,image/*'})
         }
