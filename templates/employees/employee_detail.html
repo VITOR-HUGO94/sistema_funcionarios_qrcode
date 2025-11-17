@@ -55,9 +55,9 @@
             </button>
         </div>
         <div class="card-body">
-            {% if employee.certificates.exists %}
+            {% if certificates %}
             <div class="row">
-                {% for certificate in employee.certificates.all %}
+                {% for certificate in certificates %}
                 <div class="col-md-6 col-lg-4 mb-3">
                     <div class="card h-100">
                         <div class="card-body text-center">

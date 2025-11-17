@@ -141,20 +141,33 @@ def add_certificate(request, pk):
             certificate.employee = employee
             certificate.save()
 
-            # 🔍 Se for um PDF, tenta extrair a data de emissão
+            # 🔍 Se for um PDF, tenta extrair a data de emissão usando file-like (compatível com storage remoto)
             if certificate.file.name.lower().endswith('.pdf'):
-                file_path = certificate.file.path
-                data_emissao = extract_date_from_pdf(file_path)
-                if data_emissao:
-                    certificate.data_emissao = data_emissao
-                    certificate.save()
-                    messages.info(request, f'Data de emissão detectada: {data_emissao}')
+                try:
+                    # abra o arquivo via storage (file-like). pypdf aceita file-like objects.
+                    certificate.file.open('rb')
+                    data_emissao = extract_date_from_pdf(certificate.file)
+                    if data_emissao:
+                        # Salva no campo existente extracted_date
+                        certificate.extracted_date = data_emissao
+                        certificate.save()
+                        messages.info(request, f'Data de emissão detectada: {data_emissao}')
+                except Exception as e:
+                    # não quebrar o fluxo; apenas avisar e logar
+                    messages.warning(request, f'Não foi possível extrair data do PDF: {e}')
+                    print("Erro extração PDF:", e)
+                finally:
+                    try:
+                        certificate.file.close()
+                    except:
+                        pass
 
             messages.success(request, 'Certificado adicionado com sucesso!')
         else:
-            for error in form.errors.values():
-                messages.error(request, error)
-    
+            # mostra erros do form (limpos)
+            for field, errs in form.errors.items():
+                for err in errs:
+                    messages.error(request, f'{field}: {err}')
     return redirect('employee_detail', pk=employee.pk)
 
 @login_required
