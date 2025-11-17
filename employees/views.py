@@ -135,26 +135,36 @@ logger = logging.getLogger(__name__)
 @login_required
 def add_certificate(request, pk):
     employee = get_object_or_404(Employee, pk=pk)
+
     if request.method != 'POST':
         messages.error(request, 'Método inválido.')
         return redirect('employee_detail', pk=employee.pk)
 
+    # LOG SEGURO: não imprima objetos grandes
+    try:
+        files_info = []
+        for name, uploaded in request.FILES.items():
+            # uploaded é UploadedFile — não lemos conteúdo
+            size_kb = round(uploaded.size / 1024, 2) if hasattr(uploaded, 'size') else 'unknown'
+            files_info.append({'field': name, 'filename': getattr(uploaded, 'name', 'unknown'), 'size_kb': size_kb})
+        logger.debug("add_certificate: request.FILES summary = %s", files_info)
+    except Exception as e:
+        logger.exception("Erro ao inspecionar request.FILES: %s", e)
+
     form = CertificateForm(request.POST, request.FILES)
-    # DEBUG: log do que chegou
-    logger.debug("add_certificate: request.FILES keys = %s", list(request.FILES.keys()))
-    logger.debug("add_certificate: request.POST keys = %s", list(request.POST.keys()))
 
     if not request.FILES:
-        messages.error(request, 'Nenhum arquivo enviado (request.FILES está vazio). Verifique o enctype no formulário.')
+        messages.error(request, 'Nenhum arquivo enviado. Verifique enctype e limites do servidor (nginx, Django).')
         return redirect('employee_detail', pk=employee.pk)
 
     if form.is_valid():
         certificate = form.save(commit=False)
         certificate.employee = employee
         certificate.save()
-        logger.info("Certificado salvo (id=%s) file=%s", certificate.pk, certificate.file.name)
+        logger.info("Certificado salvo (id=%s) file=%s size=%s", certificate.pk, certificate.file.name,
+                    getattr(certificate.file, 'size', 'unknown'))
 
-        # tenta extrair data se for pdf (opcional)
+        # Extração opcional (PDF) — abra o file-like mas não leia tudo ao log
         if certificate.file.name.lower().endswith('.pdf'):
             try:
                 certificate.file.open('rb')
@@ -163,11 +173,9 @@ def add_certificate(request, pk):
                     certificate.extracted_date = data
                     certificate.save()
                     messages.info(request, f'Data de emissão detectada: {data}')
-                else:
-                    logger.info("Nenhuma data detectada no PDF (id=%s).", certificate.pk)
             except Exception as e:
                 logger.exception("Erro ao extrair data do PDF: %s", e)
-                messages.warning(request, 'Erro ao tentar extrair data do PDF (veja logs).')
+                messages.warning(request, 'Não foi possível extrair data do PDF. Veja logs do servidor.')
             finally:
                 try:
                     certificate.file.close()
@@ -178,8 +186,7 @@ def add_certificate(request, pk):
         return redirect('employee_detail', pk=employee.pk)
 
     else:
-        # log completo para debugging
-        logger.warning("Form inválido: %s", form.errors.as_json())
+        logger.warning("Form inválido ao adicionar certificado: %s", form.errors.as_json())
         messages.error(request, 'Formulário inválido. Erros: %s' % form.errors.as_text())
         return redirect('employee_detail', pk=employee.pk)
     
